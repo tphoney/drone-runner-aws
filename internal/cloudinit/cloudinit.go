@@ -91,8 +91,6 @@ restart-service sshd
 </powershell>`
 	} else {
 		gitKeysInstall := fmt.Sprintf(`<powershell>
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-choco install git.install nssm -r -y
 Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
 Set-Service -Name sshd -StartupType ‘Automatic’
 Start-Service sshd
@@ -113,9 +111,9 @@ restart-service sshd`
 fsutil file createnew "C:\Program Files\lite-engine\.env" 0
 Invoke-WebRequest -Uri "%s/lite-engine.exe" -OutFile "C:\Program Files\lite-engine\lite-engine.exe"
 New-NetFirewallRule -DisplayName "ALLOW TCP PORT 9079" -Direction inbound -Profile Any -Action Allow -LocalPort 9079 -Protocol TCP
-nssm.exe install lite-engine "C:\Program Files\lite-engine\lite-engine.exe" server --env-file="""""""C:\Program Files\lite-engine\.env"""""""
-nssm.exe start lite-engine 
+
 </powershell>`, params.LiteEnginePath)
+		// "C:\Program Files\lite-engine\lite-engine.exe" service --env-file="""""""C:\Program Files\lite-engine\.env"""""""
 		certs := createWindowsCertsSection(params.SourceCertificateFolder, "/tmp/certs")
 		payload = gitKeysInstall + adminAccessSSHRestart + certs + installLE
 	}
