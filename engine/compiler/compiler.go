@@ -24,7 +24,6 @@ import (
 	lespec "github.com/harness/lite-engine/engine/spec"
 
 	"github.com/dchest/uniuri"
-	"github.com/gosimple/slug"
 )
 
 // random generator function
@@ -181,14 +180,18 @@ func (c *Compiler) Compile(ctx context.Context, args runtime.CompilerArgs) runti
 				},
 			),
 		)
-
-		cmd, args := oshelp.GetCommand(pipelineOS, clonepath)
+		var cloneEntrypoint []string
+		if pipelineOS == "windows" {
+			cloneEntrypoint = []string{"powershell"}
+		} else {
+			cloneEntrypoint = []string{"sh", "-c"}
+		}
 		spec.Steps = append(spec.Steps, &engine.Step{
 			Step: lespec.Step{
 				ID:         random(),
 				Name:       "clone",
-				Entrypoint: append([]string{cmd}, args...),
-				Command:    nil,
+				Entrypoint: cloneEntrypoint,
+				Command:    []string{clonefile},
 				Envs:       envs,
 				Secrets:    []*lespec.Secret{},
 				WorkingDir: sourcedir,
@@ -248,32 +251,32 @@ func (c *Compiler) Compile(ctx context.Context, args runtime.CompilerArgs) runti
 		var volumes []*lespec.VolumeMount
 		var command []string
 		var entrypoint []string
+		stepID := random()
 
-		if src.Image != "" {
-			cmd, args := oshelp.GetCommand(pipelineOS, "")
-			entrypoint = append([]string{cmd}, args[:len(args)-1]...)
-		} else if len(src.Commands) > 0 {
-			buildslug := slug.Make(src.Name)
-			buildpath := oshelp.JoinPaths(pipelineOS, pipelineRoot, "opt", oshelp.GetExt(pipelineOS, buildslug))
-			buildfile := oshelp.GenScript(pipelineOS, src.Commands)
+		if len(src.Commands) > 0 {
+			// build the script of commands we will execute
+			scriptToExecute := oshelp.GenScript(pipelineOS, src.Commands)
+			scriptPath := oshelp.JoinPaths(pipelineOS, pipelineRoot, "opt", oshelp.GetExt(pipelineOS, stepID))
+			files = append(files, &lespec.File{
+				Path: scriptPath,
+				Mode: 0700,
+				Data: scriptToExecute,
+			})
+			command = append(command, scriptPath)
+		}
 
-			files = []*lespec.File{
-				{
-					Path: buildpath,
-					Mode: 0700,
-					Data: buildfile,
-				},
+		// set entrypoint if running on the host or if the container has commands
+		if src.Image == "" || (src.Image != "" && len(src.Commands) > 0) {
+			if pipelineOS == "windows" {
+				entrypoint = []string{"powershell"}
+			} else {
+				entrypoint = []string{"sh", "-c"}
 			}
-
-			cmd, args := oshelp.GetCommand(pipelineOS, buildpath)
-			entrypoint = append([]string{cmd}, args...)
-		} else {
-			continue // no image and no commands
 		}
 
 		dst := &engine.Step{
 			Step: lespec.Step{
-				ID:         random(),
+				ID:         stepID,
 				Name:       src.Name,
 				Command:    command,
 				Detach:     src.Detach,

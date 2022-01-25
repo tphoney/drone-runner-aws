@@ -125,6 +125,8 @@ runcmd:
 - 'wget "{{ .LiteEnginePath }}/lite-engine" -O /usr/bin/lite-engine'
 - 'chmod 777 /usr/bin/lite-engine'
 - 'touch /root/.env'
+- 'echo "DEBUG=true" >> /root/.env'
+- 'echo "TRACE=true" >> /root/.env'
 - '/usr/bin/lite-engine server --env-file /root/.env > /var/log/lite-engine.log 2>&1 &'`
 
 var linuxTemplate = template.Must(template.New("linux").Funcs(funcs).Parse(linuxScript))
