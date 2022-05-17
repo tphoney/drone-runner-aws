@@ -81,17 +81,23 @@ func WithTags(tags ...string) Option {
 	}
 }
 
-// WithUserData returns an option to set the cloud-init
-// template from text.
-func WithUserData(text string) Option {
-	return func(p *provider) {
-		if text != "" {
-			data, err := os.ReadFile(text)
-			if err != nil {
-				logrus.Error(err)
-				return
+// WithUserData returns an option to set the cloud-init template from a file location or passed in text.
+func WithUserData(text, path string) Option {
+	if text != "" {
+		return func(p *provider) {
+			p.userData = text
+		}
+	} else {
+		return func(p *provider) {
+			if path != "" {
+				data, err := os.ReadFile(path)
+				if err != nil {
+					logrus.WithError(err).
+						Fatalln("failed to read user_data file")
+					return
+				}
+				p.userData = string(data)
 			}
-			p.userData = string(data)
 		}
 	}
 }

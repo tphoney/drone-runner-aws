@@ -34,20 +34,21 @@ type (
 			Scopes              []string `json:"scopes,omitempty"  yaml:"scopes"`
 			ServiceAccountEmail string   `json:"service_account_email,omitempty"  yaml:"service_account_email"`
 		} `json:"account,omitempty"  yaml:"account"`
-		Image       string            `json:"image,omitempty" yaml:"image, omitempty"`
-		Name        string            `json:"name,omitempty"`
-		Tags        []string          `json:"tags,omitempty"`
-		Size        string            `json:"size,omitempty"`
-		MachineType string            `json:"machine_type,omitempty" yaml:"machine_type"`
-		UserData    string            `json:"user_data,omitempty"`
-		UserDataKey string            `json:"user_data_key,omitempty"`
-		Disk        disk              `json:"disk,omitempty"`
-		Network     string            `json:"network,omitempty"`
-		Subnetwork  string            `json:"Subnetwork,omitempty"`
-		PrivateIP   bool              `json:"private_ip,omitempty"`
-		Zone        []string          `json:"zone,omitempty" yaml:"zone"`
-		Labels      map[string]string `json:"labels,omitempty"`
-		Scopes      []string          `json:"scopes,omitempty"`
+		Image        string            `json:"image,omitempty" yaml:"image, omitempty"`
+		Name         string            `json:"name,omitempty"`
+		Tags         []string          `json:"tags,omitempty"`
+		Size         string            `json:"size,omitempty"`
+		MachineType  string            `json:"machine_type,omitempty" yaml:"machine_type"`
+		UserData     string            `json:"user_data,omitempty"`
+		UserDataPath string            `json:"user_data_path,omitempty" yaml:"user_data_path,omitempty"`
+		UserDataKey  string            `json:"user_data_key,omitempty"`
+		Disk         disk              `json:"disk,omitempty"`
+		Network      string            `json:"network,omitempty"`
+		Subnetwork   string            `json:"Subnetwork,omitempty"`
+		PrivateIP    bool              `json:"private_ip,omitempty"`
+		Zone         []string          `json:"zone,omitempty" yaml:"zone"`
+		Labels       map[string]string `json:"labels,omitempty"`
+		Scopes       []string          `json:"scopes,omitempty"`
 	}
 
 	// Amazon specifies the configuration for an AWS instance.
@@ -61,6 +62,7 @@ type (
 		Tags          map[string]string `json:"tags,omitempty" yaml:"tags,omitempty"`
 		Type          string            `json:"type,omitempty" yaml:"type,omitempty"`
 		UserData      string            `json:"user_data,omitempty" yaml:"user_data,omitempty"`
+		UserDataPath  string            `json:"user_data_Path,omitempty" yaml:"user_data_Path,omitempty"`
 		Disk          disk              `json:"disk,omitempty" yaml:"disk,omitempty"`
 		Network       AmazonNetwork     `json:"network,omitempty" yaml:"network,omitempty"`
 		DeviceName    string            `json:"device_name,omitempty" yaml:"device_name,omitempty"`
@@ -99,6 +101,7 @@ type (
 		CPU           int64  `json:"cpu,omitempty" yaml:"cpu"`
 		VDiskPath     string `json:"v_disk_path,omitempty" yaml:"v_disk_path"`
 		UserData      string `json:"user_data,omitempty"`
+		UserDataPath  string `json:"user_data_Path,omitempty" yaml:"user_data_Path,omitempty"`
 		StorePath     string `json:"store_path,omitempty" yaml:"store_path"`
 		RootDirectory string `json:"root_directory,omitempty" yaml:"root_directory"`
 	}
@@ -111,6 +114,7 @@ type (
 		VMID          string `json:"vm_id,omitempty" yaml:"vm_id"`
 		RootDirectory string `json:"root_directory,omitempty" yaml:"root_directory"`
 		UserData      string `json:"user_data,omitempty" yaml:"user_data"`
+		UserDataPath  string `json:"user_data_Path,omitempty" yaml:"user_data_Path,omitempty"`
 	}
 
 	// Platform specifies the configuration for a platform instance.
