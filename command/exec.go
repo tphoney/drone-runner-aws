@@ -60,12 +60,15 @@ type execCommand struct {
 
 func (c *execCommand) run(*kingpin.ParseContext) error { //nolint:gocyclo // its complex but not too bad.
 	const runnerName = "exec"
+	// lets validate the vmtype
+	if c.vmType != string(types.ProviderAmazon) && c.vmType != string(types.ProviderGoogle) {
+		return fmt.Errorf("invalid vmtype '%s' it must be one of '%s/%s'", c.vmType, types.ProviderAmazon, types.ProviderGoogle)
+	}
 
 	rawsource, err := io.ReadAll(c.Source)
 	if err != nil {
 		return err
 	}
-
 	// load the environment configuration from the environment
 	envConfig, err := config.FromEnviron()
 	if err != nil {

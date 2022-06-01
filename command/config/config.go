@@ -28,12 +28,7 @@ type (
 
 	// Google specifies the configuration for a GCP instance.
 	Google struct {
-		Account struct {
-			ProjectID           string   `json:"project_id,omitempty"  yaml:"project_id"`
-			JSONPath            string   `json:"json_path,omitempty"  yaml:"json_path"`
-			Scopes              []string `json:"scopes,omitempty"  yaml:"scopes"`
-			ServiceAccountEmail string   `json:"service_account_email,omitempty"  yaml:"service_account_email"`
-		} `json:"account,omitempty"  yaml:"account"`
+		Account      GoogleAccount     `json:"account,omitempty"  yaml:"account"`
 		Image        string            `json:"image,omitempty" yaml:"image, omitempty"`
 		Name         string            `json:"name,omitempty"`
 		Tags         []string          `json:"tags,omitempty"`
@@ -49,6 +44,13 @@ type (
 		Zone         []string          `json:"zone,omitempty" yaml:"zone"`
 		Labels       map[string]string `json:"labels,omitempty"`
 		Scopes       []string          `json:"scopes,omitempty"`
+	}
+
+	GoogleAccount struct {
+		ProjectID           string   `json:"project_id,omitempty"  yaml:"project_id"`
+		JSONPath            string   `json:"json_path,omitempty"  yaml:"json_path"`
+		Scopes              []string `json:"scopes,omitempty"  yaml:"scopes"`
+		ServiceAccountEmail string   `json:"service_account_email,omitempty"  yaml:"service_account_email"`
 	}
 
 	// Amazon specifies the configuration for an AWS instance.
@@ -169,6 +171,12 @@ type EnvConfig struct {
 		AccessKeyID     string `envconfig:"AWS_ACCESS_KEY_ID"`
 		AccessKeySecret string `envconfig:"AWS_ACCESS_KEY_SECRET"`
 		Region          string `envconfig:"AWS_DEFAULT_REGION" default:"us-east-2"`
+	}
+
+	Google struct {
+		ProjectID string `envconfig:"GOOGLE_PROJECT_ID"`
+		JSONPath  string `envconfig:"GOOGLE_JSON_PATH" default:"~/.config/gcloud/application_default_credentials.json"`
+		Zone      string `envconfig:"GOOGLE_ZONE" default:"northamerica-northeast1-a"`
 	}
 
 	Limit struct {

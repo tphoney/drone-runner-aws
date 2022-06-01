@@ -1,7 +1,9 @@
 package poolfile
 
 import (
+	"errors"
 	"fmt"
+	"os"
 
 	"github.com/drone-runners/drone-runner-aws/command/config"
 	"github.com/drone-runners/drone-runner-aws/internal/drivers"
@@ -193,7 +195,15 @@ func ConfigPoolFile(filepath, providerType string, conf *config.EnvConfig) (pool
 				return pool, fmt.Errorf("%s:missing credentials in env variables 'AWS_ACCESS_KEY_ID' and 'AWS_ACCESS_KEY_SECRET'", providerType)
 			}
 			return createAmazonPool(conf.AWS.AccessKeyID, conf.AWS.AccessKeySecret, conf.AWS.Region, conf.Settings.MinPoolSize, conf.Settings.MaxPoolSize), nil
-
+		case string(types.ProviderGoogle):
+			// do we have the creds?
+			if conf.Google.ProjectID == "" {
+				return pool, fmt.Errorf("%s:missing credentials in env variables 'GOOGLE_PROJECT_ID'", providerType)
+			}
+			if os.Stat(conf.Google.JSONPath); errors.Is(err, os.ErrNotExist) {
+				return pool, fmt.Errorf("%s:missing credentials file at '%s'", providerType, conf.Google.JSONPath)
+			}
+			return createGooglePool(conf.Google.ProjectID, conf.Google.JSONPath, conf.Google.Zone, conf.Settings.MinPoolSize, conf.Settings.MaxPoolSize), nil
 		default:
 			err = fmt.Errorf("unknown provider type %s, unable to create pool file in memory", providerType)
 			return pool, err
@@ -236,6 +246,35 @@ func createAmazonPool(accessKeyID, accessKeySecret, region string, minPoolSize, 
 			},
 			AMI:  "ami-051197ce9cbb023ea",
 			Size: "t2.micro",
+		},
+	}
+	poolfile := config.PoolFile{
+		Version:   "1",
+		Instances: []config.Instance{instance},
+	}
+
+	return &poolfile
+}
+
+func createGooglePool(projectID, path, zone string, minPoolSize, maxPoolSize int) *config.PoolFile {
+	instance := config.Instance{
+		Name:    "test-pool",
+		Default: true,
+		Type:    string(types.ProviderGoogle),
+		Pool:    minPoolSize,
+		Limit:   maxPoolSize,
+		Platform: config.Platform{
+			Arch: "amd64",
+			OS:   "linux",
+		},
+		Spec: &config.Google{
+			Account: config.GoogleAccount{
+				ProjectID: projectID,
+				JSONPath:  path,
+			},
+			Image:       "projects/ubuntu-os-pro-cloud/global/images/ubuntu-pro-1804-bionic-v20220131",
+			MachineType: "e2-small",
+			Zone:        []string{zone},
 		},
 	}
 	poolfile := config.PoolFile{
