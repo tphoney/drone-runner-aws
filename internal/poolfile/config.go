@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/drone-runners/drone-runner-aws/command/config"
 	"github.com/drone-runners/drone-runner-aws/internal/drivers"
@@ -16,6 +18,10 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/sirupsen/logrus"
+)
+
+const (
+	DefaultPoolName = "testpool"
 )
 
 func ProcessPool(poolFile *config.PoolFile, runnerName string) ([]drivers.Pool, error) {
@@ -184,9 +190,9 @@ func mapPool(instance *config.Instance, runnerName string) (pool drivers.Pool) {
 	return pool
 }
 
-func ConfigPoolFile(filepath, providerType string, conf *config.EnvConfig) (pool *config.PoolFile, err error) {
-	if filepath == "" {
-		logrus.Infof("no pool file provided, creating in memmory pool for %s", providerType)
+func ConfigPoolFile(path, providerType string, conf *config.EnvConfig) (pool *config.PoolFile, err error) {
+	if path == "" {
+		logrus.Infof("no pool file provided, creating in memory pool for %s", providerType)
 		// generate a pool file
 		switch providerType {
 		case string(types.ProviderAmazon):
@@ -200,8 +206,14 @@ func ConfigPoolFile(filepath, providerType string, conf *config.EnvConfig) (pool
 			if conf.Google.ProjectID == "" {
 				return pool, fmt.Errorf("%s:missing credentials in env variables 'GOOGLE_PROJECT_ID'", providerType)
 			}
-			if os.Stat(conf.Google.JSONPath); errors.Is(err, os.ErrNotExist) {
-				return pool, fmt.Errorf("%s:missing credentials file at '%s'", providerType, conf.Google.JSONPath)
+			absPath := filepath.Clean(conf.Google.JSONPath)
+			if strings.HasPrefix(absPath, "~/") {
+				dirname, _ := os.UserHomeDir()
+				absPath = filepath.Join(dirname, absPath[2:])
+			}
+			_, pathErr := os.Stat(absPath)
+			if errors.Is(pathErr, os.ErrNotExist) {
+				return pool, fmt.Errorf("%s:unable to find credentials file at '%s'", providerType, conf.Google.JSONPath)
 			}
 			return createGooglePool(conf.Google.ProjectID, conf.Google.JSONPath, conf.Google.Zone, conf.Settings.MinPoolSize, conf.Settings.MaxPoolSize), nil
 		default:
@@ -209,10 +221,10 @@ func ConfigPoolFile(filepath, providerType string, conf *config.EnvConfig) (pool
 			return pool, err
 		}
 	}
-	pool, err = config.ParseFile(filepath)
+	pool, err = config.ParseFile(path)
 	if err != nil {
 		logrus.WithError(err).
-			WithField("filepath", filepath).
+			WithField("path", path).
 			Errorln("exec: unable to parse pool file")
 	}
 	return pool, err
@@ -229,7 +241,7 @@ func PrintPoolFile(pool *config.PoolFile) {
 
 func createAmazonPool(accessKeyID, accessKeySecret, region string, minPoolSize, maxPoolSize int) *config.PoolFile {
 	instance := config.Instance{
-		Name:    "test_pool",
+		Name:    DefaultPoolName,
 		Default: true,
 		Type:    string(types.ProviderAmazon),
 		Pool:    minPoolSize,
@@ -258,12 +270,12 @@ func createAmazonPool(accessKeyID, accessKeySecret, region string, minPoolSize, 
 
 func createGooglePool(projectID, path, zone string, minPoolSize, maxPoolSize int) *config.PoolFile {
 	instance := config.Instance{
-		Name:    "test-pool",
+		Name:    DefaultPoolName,
 		Default: true,
 		Type:    string(types.ProviderGoogle),
 		Pool:    minPoolSize,
 		Limit:   maxPoolSize,
-		Platform: config.Platform{
+		Platform: types.Platform{
 			Arch: "amd64",
 			OS:   "linux",
 		},

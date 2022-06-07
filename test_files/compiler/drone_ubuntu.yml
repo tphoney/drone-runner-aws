@@ -3,7 +3,7 @@ type: vm
 name: default
 
 pool:
-  use: test_pool
+  use: testpool
 
 steps:
   - name: check install

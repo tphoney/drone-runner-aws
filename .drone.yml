@@ -64,12 +64,12 @@ steps:
       - sleep 30
       - cat delegate.log
       - |
-        INSTANCE=`curl -d '{"id": "unique-stage-id","correlation_id":"abc1","pool_id":"test_pool", "setup_request": {"network": {"id":"drone"}, "platform": { "os":"ubuntu" }}}' -H "Content-Type: application/json" -X POST  http://localhost:3000/setup | cut -d'"' -f 4`
+        INSTANCE=`curl -d '{"id": "unique-stage-id","correlation_id":"abc1","pool_id":"testpool", "setup_request": {"network": {"id":"drone"}, "platform": { "os":"ubuntu" }}}' -H "Content-Type: application/json" -X POST  http://localhost:3000/setup | cut -d'"' -f 4`
       - |
-        curl -d "{\"id\":\"unique-stage-id\",\"instance_id\":\"$INSTANCE\",\"pool_id\":\"test_pool\",\"correlation_id\":\"abc1\",\"start_step_request\":{\"id\":\"step4\",\"image\":\"alpine:3.11\",\"working_dir\":\"/tmp\",\"run\":{\"commands\":[\"sleep 30\"], \"entrypoint\":[\"sh\", \"-c\"]}}}" -H "Content-Type: application/json" -X POST  http://localhost:3000/step
+        curl -d "{\"id\":\"unique-stage-id\",\"instance_id\":\"$INSTANCE\",\"pool_id\":\"testpool\",\"correlation_id\":\"abc1\",\"start_step_request\":{\"id\":\"step4\",\"image\":\"alpine:3.11\",\"working_dir\":\"/tmp\",\"run\":{\"commands\":[\"sleep 30\"], \"entrypoint\":[\"sh\", \"-c\"]}}}" -H "Content-Type: application/json" -X POST  http://localhost:3000/step
       - echo "step status:"$?
       - |
-        curl -d "{\"id\":\"unique-stage-id\",\"instance_id\":\"$INSTANCE\",\"pool_id\":\"test_pool\",\"correlation_id\":\"abc1\"}" -H "Content-Type: application/json" -X POST  http://127.0.0.1:3000/destroy
+        curl -d "{\"id\":\"unique-stage-id\",\"instance_id\":\"$INSTANCE\",\"pool_id\":\"testpool\",\"correlation_id\":\"abc1\"}" -H "Content-Type: application/json" -X POST  http://127.0.0.1:3000/destroy
       - echo "destroy status:"$?
       - echo "view logs"
       - cat delegate.log
