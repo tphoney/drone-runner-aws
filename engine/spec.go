@@ -17,13 +17,15 @@ type (
 	// required instructions for reproducible pipeline
 	// execution.
 	Spec struct {
-		Name          string           `json:"name,omitempty"`
-		CloudInstance CloudInstance    `json:"cloud_instance"`
-		Files         []*lespec.File   `json:"files,omitempty"`
-		Platform      types.Platform   `json:"platform"`
-		Steps         []*Step          `json:"steps,omitempty"`
-		Volumes       []*lespec.Volume `json:"volumes,omitempty"`
-		Network       lespec.Network   `json:"network"`
+		Name                string            `json:"name,omitempty"`
+		CloudInstance       CloudInstance     `json:"cloud_instance"`
+		Files               []*lespec.File    `json:"files,omitempty"`
+		Platform            types.Platform    `json:"platform"`
+		Steps               []*Step           `json:"steps,omitempty"`
+		Volumes             []*lespec.Volume  `json:"volumes,omitempty"`
+		Network             lespec.Network    `json:"network"`
+		OutputVars          map[string]string `json:"output_vars,omitempty"`
+		OutputVariablesFile string            `json:"output_variables_file,omitempty"`
 	}
 
 	// CloudInstance provides basic instance information
@@ -50,6 +52,10 @@ type (
 
 func (s *Spec) StepLen() int              { return len(s.Steps) }
 func (s *Spec) StepAt(i int) runtime.Step { return s.Steps[i] }
+func (s *Spec) OutputVariablesToStep() map[string]string {
+	// called by runner_go execer to return the output variables set in the previous steps.
+	return s.OutputVars
+}
 
 //
 // implements the Secret interface

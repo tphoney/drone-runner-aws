@@ -7,6 +7,7 @@ package compiler
 import (
 	"context"
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/drone-runners/drone-runner-aws/engine"
@@ -64,6 +65,8 @@ type (
 
 		// Tmate provides global configration options for tmate live debugging.
 		Tmate
+
+		OutputVariablesFile string
 	}
 )
 
@@ -142,6 +145,10 @@ func (c *Compiler) Compile(ctx context.Context, args runtime.CompilerArgs) runti
 			"GIT_TERMINAL_PROMPT": "0",
 		},
 	)
+
+	// outputvariables file
+	envs["DRONE_ENV"] = path.Join(sourceDir, c.OutputVariablesFile)
+	spec.OutputVariablesFile = envs["DRONE_ENV"]
 
 	// add tmate settings to the environment
 	if c.Tmate.Server != "" {

@@ -305,6 +305,8 @@ func (e *Engine) Run(ctx context.Context, specv runtime.Spec, stepv runtime.Step
 
 	wg.Wait()
 
+	spec.OutputVars = pollResponse.Outputs
+
 	state := &runtime.State{
 		ExitCode:  pollResponse.ExitCode,
 		Exited:    pollResponse.Exited,

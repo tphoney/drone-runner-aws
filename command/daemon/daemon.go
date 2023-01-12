@@ -176,8 +176,9 @@ func (c *daemonCommand) run(*kingpin.ParseContext) error {
 					env.Environ.SkipVerify,
 				),
 			),
-			NetworkOpts: env.Runner.NetworkOpts,
-			Volumes:     env.Runner.Volumes,
+			OutputVariablesFile: env.Runner.OutputVariablesFile,
+			NetworkOpts:         env.Runner.NetworkOpts,
+			Volumes:             env.Runner.Volumes,
 			Secret: secret.Combine(
 				secret.StaticVars(
 					env.Runner.Secrets,
